@@ -1,13 +1,14 @@
-//Chirping Wall
+//Chirping Wall Demo for Processing.org 3
 
-int frameTime = 0;
-float maxFrames = sqrt(sq(1280 * 2) + sq(720 * 2));
-String fName;
-float ix = 40;
-float iy = 200;
-float[] px = new float[16];
-float[] py = new float[16];
-float[] pd = new float[16];
+int frameTime = 0;    //used to track animation frames
+float maxFrames = sqrt(sq(1280 * 2) + sq(720 * 2));  //number of frames = twice the diagonal width of the image
+                                                     //because the 'speed of sound' is 1px/frame
+String fName;  //stores numbered file names for png export
+float ix = 40;  //initial x location of clap
+float iy = 200; //initial y location of clap
+float[] px = new float[16];  //stores x location of peaks on the wall
+float[] py = new float[16];  //stures y location of peaks on the wall
+float[] pd = new float[16];  //stores distance from initial clap to each peak
 
 void setup(){
   size(1280,720);
@@ -15,10 +16,10 @@ void setup(){
 
 void draw(){
   background(255); //start the frame blank
-  wall();
-  clap(ix, iy, 3, 0);
-  drawPoint(ix, iy, 10);
-  for(int i = 0; i < 16; i = i + 1){
+  wall();          //draw the wall
+  clap(ix, iy, 3, 0);  //start the inital clap at time 0
+  drawPoint(ix, iy, 10);  //draw the initial clap location
+  for(int i = 0; i < 16; i = i + 1){  //for all 16 peaks on the wall draw their echo
     clap(px[i], py[i], 2, pd[i]);
   }
   
@@ -31,7 +32,7 @@ void draw(){
   
 }
 
-void drawPoint(float x, float y, float thickness){
+void drawPoint(float x, float y, float thickness){  //re-inventing the wheel, can't remember why
   if(x > 0 && x <= width && y > 0 && y <= height){
     strokeWeight(thickness);
     point(x, y);
@@ -46,25 +47,25 @@ void drawLine(float x, float y, float x2, float y2, float thickness){
   }
 }
 
-void drawArc(float x, float y, float thickness, float radius){
-  for(float a = 0; a <= 360; a = a + 1){
+void drawArc(float x, float y, float thickness, float radius){  //draws an arc that doesn't extend past the edge of the screen.
+  for(float a = 0; a <= 360; a = a + 1){  //making the increment smaller makes the arcs smoother but takes way more time to run
     //drawPoint(x + (cos(a / (180 / PI)) * radius), y + (sin(a / (180 / PI)) * radius), thickness);
     drawLine(x + (cos(a / (180 / PI)) * radius), y + (sin(a / (180 / PI)) * radius), x + (cos((a - 1) / (180 / PI)) * radius), y + (sin((a - 1) / (180 / PI)) * radius), thickness);
   }
 }
 
-void makeImage(){
+void makeImage(){  //used to export images.
   fName = (nf(frameTime, 4) + ".png");
   save(fName);
 }
 
 void clap(float x, float y, float thickness, float iTime){ //start a growing arc at x,y and frame iTime
-  if(frameTime >= iTime){
-    drawArc(x, y, thickness, frameTime - iTime);
+  if(frameTime >= iTime){    //no reverse echos before the initial clap arrives at a peak
+    drawArc(x, y, thickness, frameTime - iTime);  //draw an arc that expands with every frame after it's initial time
   }
 }
 
-void wall(){
+void wall(){  //draws a wall made of peaks, records location of the peaks and their distance from the initial clap in px[], py[] and pd[]
   int x = 0;
   int y = 720;
   strokeWeight(3);
